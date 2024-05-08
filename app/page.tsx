@@ -1,4 +1,6 @@
-import { useEffect, useState } from 'react';
+"use client"; 
+
+import React, { useEffect, useState } from 'react';
 
 interface Task {
   id: number;
@@ -9,6 +11,7 @@ interface Task {
     outside: boolean;
   };
 }
+
 
 type TasksJson = Task[];
 
@@ -27,18 +30,20 @@ const MainPage: React.FC = () => {
       const data: TasksJson = await response.json();
       setTasks(data);
       setCurrentTask(data[0]);
+      console.log(response, data)
     };
     loadTasks();
   }, []);
 
   const getRandomTask = () => {
-    const filteredTasks = tasks.filter((task) => {
+    const filteredTasks = tasks.filter((task: { attributes: { sexual: any; expensive: any; outside: any; }; }) => {
       return (
         (!filters.sexual || (filters.sexual && task.attributes.sexual)) &&
         (!filters.expensive || (filters.expensive && task.attributes.expensive)) &&
         (!filters.outside || task.attributes.outside === filters.outside)
       );
     });
+    console.log(filteredTasks)
 
     if (filteredTasks.length === 0) {
       alert('No tasks match your filters.');
@@ -49,7 +54,7 @@ const MainPage: React.FC = () => {
     setCurrentTask(filteredTasks[randomIndex]);
   };
 
-  const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
+  const TaskCard: React.FC<{ task: Task }> = ({ task }: { task: Task }) => {
     return (
       <div className="p-4 m-4 border rounded shadow">
         <p>{task.description}</p>
@@ -87,3 +92,4 @@ const MainPage: React.FC = () => {
     </div>
   );
 };
+export default MainPage;
