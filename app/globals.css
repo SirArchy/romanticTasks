@@ -24,6 +24,44 @@ body {
   );
 }
 
+/* Flex container */
+.min-h-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Flex item */
+.bg-black {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .bg-black {
+    width: 100%;
+    padding: 1em;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .bg-black {
+    width: 75%;
+    padding: 2em;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  .bg-black {
+    width: 50%;
+    padding: 3em;
+  }
+}
+
 /*//////////////////////////////////////////////////////////////////
 [ RESTYLE TAG ]*/
 
@@ -363,6 +401,8 @@ textarea.input1 + .shadow-input1 {
 }
 
 
+
+
 /*------------------------------------------------------------------
 [ Alert validate ]*/
 
@@ -466,4 +506,11 @@ textarea.input1 + .shadow-input1 {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+
+.language-switch {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

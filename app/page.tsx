@@ -23,6 +23,7 @@ import translationsDe from './translationsDe.json';
 import translationsEn from './translationsEn.json';
 import translationsEs from './translationsEs.json';
 import Image from 'next/image';
+import Switch from '@mui/material/Switch';
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, addDoc, getDocs, updateDoc } from "firebase/firestore";
 
@@ -220,22 +221,76 @@ const MainPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex justify-center items-center">
-      <div className="bg-black rounded-lg p-6 w-11/12 max-w-md">
-      <h1 className="text-white text-2xl font-bold mb-4">{translations.title}</h1>
+      <div className="bg-black rounded-lg p-6 w-full max-w-2xl min-h-[50vh]">
+      <h1 className="text-white text-4xl font-bold mb-4 text-center">{translations.title}</h1>
       {currentTask && <TaskCard task={currentTask} />}
       <button 
-        className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full mt-4 hover:bg-blue-700"
+          className="bg-purple-700 text-white font-bold py-2 px-4 rounded-full mt-4 hover:bg-purple-800 transition-colors duration-200"
+          style={{
+            background: 'linear-gradient(to right, rgb(23, 25, 64), rgb(93, 35, 130), rgb(161, 13, 99))',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '9999px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: '0.5s',
+          }}
+          onMouseOver={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(13, 15, 54), rgb(63, 25, 110), rgb(131, 3, 79))'}
+          onMouseOut={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(23, 25, 64), rgb(93, 35, 130), rgb(161, 13, 99))'}
         onClick={getRandomTask}>
           {translations.newTaskButton}
       </button>
+      <h2 className="text-white text-2xl font-bold pt-4" >{translations.include}</h2>
+      <div className="flex flex-col">
+      <FormControlLabel
+        control={
+          <Switch
+            checked={filters.sexual}
+            onChange={() => setFilters({ ...filters, sexual: !filters.sexual })}
+          />
+        }
+        label={translations.addTaskForm.filterSexual}
+      />
+    
+      <FormControlLabel
+        control={
+          <Switch
+            checked={filters.expensive}
+            onChange={() => setFilters({ ...filters, expensive: !filters.expensive })}
+          />
+        }
+        label={translations.addTaskForm.filterExpensive}
+      />
+    
+      <FormControlLabel
+        control={
+          <Switch
+            checked={filters.outside}
+            onChange={() => setFilters({ ...filters, outside: !filters.outside })}
+          />
+        }
+        label={translations.addTaskForm.filterOutside}
+      />
+    </div>
       <button 
-        className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full mt-4 hover:bg-blue-700"
+          className="bg-purple-700 text-white font-bold py-2 px-4 rounded-full mt-4 hover:bg-purple-800 transition-colors duration-200"
+          style={{
+            background: 'linear-gradient(to right, rgb(23, 25, 64), rgb(93, 35, 130), rgb(161, 13, 99))',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '9999px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: '0.5s',
+          }}
+          onMouseOver={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(13, 15, 54), rgb(63, 25, 110), rgb(131, 3, 79))'}
+          onMouseOut={(e) => e.currentTarget.style.background = 'linear-gradient(to right, rgb(23, 25, 64), rgb(93, 35, 130), rgb(161, 13, 99))'}
         onClick={() => setShowDialog(true)}>
         {translations.addTaskButton}
       </button>
-      <Dialog open={showDialog} onClose={() => setShowDialog(false)} sx={{'& .MuiPaper-root': {borderRadius: "22px"}}}>
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)} sx={{'& .MuiPaper-root': {borderRadius: "22px"}}} className="bg-black rounded-lg p-6 w-11/12 max-w-md">
   <DialogTitle>{translations.addTaskForm.title}</DialogTitle>
-  <DialogContent>
+  <DialogContent >
     <form onSubmit={(e) => { e.preventDefault(); addNewTask(); }}>
       <TextField
         autoFocus
@@ -292,29 +347,12 @@ const MainPage: React.FC = () => {
     </form>
   </DialogContent>
 </Dialog>
-      <div>
-        <label>
-          <input type="checkbox" checked={filters.sexual} onChange={() => setFilters({ ...filters, sexual: !filters.sexual })} />
-          {translations.addTaskForm.filterSexual}
-        </label>
-
-        <label>
-          <input type="checkbox" checked={filters.expensive} onChange={() => setFilters({ ...filters, expensive: !filters.expensive })} />
-          {translations.addTaskForm.filterExpensive}
-        </label>
-
-        <label>
-          <input type="checkbox" checked={filters.outside} onChange={() => setFilters({ ...filters, outside: !filters.outside })} />
-          {translations.addTaskForm.filterOutside}
-        </label>
-
-      </div>
-      <div>
+      <div className="flex justify-center items-center space-x-4 space-y-4">
         <button onClick={() => switchLanguage('de')}><Image src={flagOfGermany} width={50} height={50} alt="DE" /></button>
         <button onClick={() => switchLanguage('en')}><Image src={flagOfUk} width={50} height={50} alt="EN" /></button>
         <button onClick={() => switchLanguage('es')}><Image src={flagOfSpain} width={50} height={50} alt="ES" /></button>
       </div>
-      <div className="flex justify-center mt-4">
+      <div className="flex justify-center items-center space-x-4 space-y-4">
         <button onClick={handleOpenContactForm}><EmailIcon /></button>
         <button onClick={() => window.location.href='mailto:fabian.ebert@online.de'}><AlternateEmailIcon /></button>
         <button onClick={() => window.open('https://github.com/SirArchy', '_blank')}><GitHubIcon /></button>

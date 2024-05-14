@@ -1,7 +1,8 @@
 {
   "title": "GENERADOR DE TAREAS ROMÁNTICAS",
+  "include": "Incluya: ",
   "newTaskButton": "Obtener otra tarea",
-  "addTaskButton": "Añadir nueva idea de tarea",
+  "addTaskButton": "Añadir nueva tarea",
   "filterAlert": "Ninguna tarea coincide con sus filtros.",
   "contactForm": {
     "title": "Póngase en contacto conmigo.",
