@@ -1,0 +1,35 @@
+{
+  "title": "GENERADOR DE TAREAS ROMÁNTICAS",
+  "newTaskButton": "Obtener otra tarea",
+  "addTaskButton": "Añadir nueva idea de tarea",
+  "filterAlert": "Ninguna tarea coincide con sus filtros.",
+  "contactForm": {
+    "title": "Póngase en contacto conmigo.",
+    "name": "Nombre",
+    "email": "Correo electrónico",
+    "message": "Mensaje",
+    "subject": "Asunto",
+    "send": "Enviar",
+    "alert": "El correo electrónico fue enviado. Gracias.",
+    "validate": {
+        "name": "Nombre obligatorio",
+        "email": "Se requiere un correo electrónico válido: ex@abc.xyz",
+        "subject": "El tema es obligatorio",
+        "message": "El mensaje es obligatorio"
+    }
+  },
+    "addTaskForm": {
+      "title": "Añadir una nueva tarea",
+      "filterSexual": "Sexual",
+      "filterExpensive": "Caro",
+      "filterOutside": "En el exterior",
+      "submit": "Cree",
+      "close": "Cerrar",
+      "alert": "El correo electrónico fue enviado. Gracias.",
+      "description": "Descripción",
+      "validate": {
+          "descriptionAlert": "Descripción obligatoria",
+          "filterAlert": "Se necesitan filtros"
+      }
+    }
+  }

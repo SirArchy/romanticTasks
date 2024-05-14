@@ -1,0 +1,35 @@
+{
+"title": "ROMANTIC TASK GENERATOR",
+"newTaskButton": "Get another task",
+"addTaskButton": "Add new task idea",
+"filterAlert": "No tasks match your filters.",
+"contactForm": {
+    "title": "Contact me!",
+    "name": "Name",
+    "email": "E-Mail",
+    "message": "Message",
+    "subject": "Subject",
+    "send": "Send",
+    "alert": "Email was send. Thank you!",
+    "validate": {
+        "name": "Name is required",
+        "email": "Valid email is required: ex@abc.xyz",
+        "subject": "Subject is required",
+        "message": "Message is required"
+    }
+  },
+  "addTaskForm": {
+    "title": "Add a new Task",
+    "filterSexual": "Sexual",
+    "filterExpensive": "Expensive",
+    "filterOutside": "Outside",
+    "submit": "Create",
+    "close": "Close",
+    "alert": "Task was created. Thank you!",
+    "description": "Description",
+    "validate": {
+        "descriptionAlert": "Description is required",
+        "filterAlert": "Filters are required"
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "title": "ROMANTISCHE AUFGABEN GENERATOR",
+  "newTaskButton": "Neue Aufgabe",
+  "addTaskButton": "Erstelle Aufgabe",
+  "filterAlert": "Es konnten keine Aufgaben für die ausgewählten Filter gefunden werden.",
+  "contactForm": {
+    "title": "Kontaktiere mich!",
+    "name": "Name",
+    "email": "E-Mail",
+    "message": "Nachricht",
+    "subject": "Betreff",
+    "send": "Senden",
+    "alert": "Email wurde versendet. Vielen Danke!",
+    "validate": {
+      "name": "Name ist erforderlich",
+      "email": "Gültige E-Mail ist erforderlich: ex@abc.xyz",
+      "subject": "Betreff ist erforderlich",
+      "message": "Nachricht ist erforderlich"
+      }
+    },
+    "addTaskForm": {
+      "title": "Erstelle Aufgabe",
+      "filterSexual": "Erotisch",
+      "filterExpensive": "Teuer",
+      "filterOutside": "Im Freien",
+      "submit": "Erstellen",
+      "close": "Schließen",
+      "alert": "Aufgabe wurde erstellt. Vielen Dank!",
+      "description": "Beschreibung",
+      "validate": {
+          "descriptionAlert": "Beschreibung ist erforderlich",
+          "filterAlert": "Filter sind erforderlich"
+      }
+    }
+  }

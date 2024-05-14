@@ -19,11 +19,36 @@ import ContactForm from './contactForm';
 import tasksDe from './romanticTasksDe.json';
 import tasksEn from './romanticTasksEn.json';
 import tasksEs from './romanticTasksEs.json';
+import translationsDe from './translationsDe.json';
+import translationsEn from './translationsEn.json';
+import translationsEs from './translationsEs.json';
+import flagOfGermany from "./utilities/images/Flag_of_Germany.png" 
+import flagOfUk from "./utilities/images/Flag_of_United_Kingdom.png"
+import flagOfSpain from "./utilities/images/Flag_of_Spain.png"
+import Image from 'next/image';
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBgNzpSAukO6EbJAQAo6MgystUV-yrRXkc",
+  authDomain: "romantictaskgenerator.firebaseapp.com",
+  projectId: "romantictaskgenerator",
+  storageBucket: "romantictaskgenerator.appspot.com",
+  messagingSenderId: "411189281051",
+  appId: "1:411189281051:web:95d235416c27c0c26b93be"
+};
+
+const app = initializeApp(firebaseConfig);
 
 const taskListByLanguage = {
   de: tasksDe,
   en: tasksEn,
   es: tasksEs,
+};
+
+const translationsByLanguage = {
+  de: translationsDe,
+  en: translationsEn,
+  es: translationsEs,
 };
 
 interface Task {
@@ -40,6 +65,7 @@ interface Task {
 
 const MainPage: React.FC = () => {
   const [language, setLanguage] = useState('en');
+  const translations = translationsByLanguage[language as keyof typeof translationsByLanguage];
   const [tasks, setTasks] = useState<Task[]>(taskListByLanguage[language as keyof typeof taskListByLanguage]);
   const [currentTask, setCurrentTask] = useState<Task | null>(taskListByLanguage[language as keyof typeof taskListByLanguage][0]);
   const [taskEngagements, setTaskEngagements] = useState<{ [key: number]: { likes: number; dislikes: number } }>({});
@@ -73,7 +99,7 @@ const MainPage: React.FC = () => {
 
   const addNewTask = () => {
     if (!newTask.description.trim()) {
-      alert('Description is required');
+      alert(translations.addTaskForm.validate.descriptionAlert);
       return;
     }
 
@@ -112,7 +138,7 @@ const MainPage: React.FC = () => {
     });
 
     if (filteredTasks.length === 0) {
-      alert('No tasks match your filters.');
+      alert(translations.filterAlert);
       return;
     }
 
@@ -156,27 +182,27 @@ const MainPage: React.FC = () => {
   return (
     <div className="min-h-screen flex justify-center items-center">
       <div className="bg-black rounded-lg p-6 w-11/12 max-w-md">
-      <h1 className="text-white text-2xl font-bold mb-4">ROMANTIC TASK GENERATOR</h1>
+      <h1 className="text-white text-2xl font-bold mb-4">{translations.title}</h1>
       {currentTask && <TaskCard task={currentTask} />}
       <button 
         className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full mt-4 hover:bg-blue-700"
         onClick={getRandomTask}>
-          Get Another Task
+          {translations.newTaskButton}
       </button>
       <button 
         className="bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full mt-4 hover:bg-blue-700"
         onClick={() => setShowDialog(true)}>
-        Add New Task Idea
+        {translations.addTaskButton}
       </button>
       <Dialog open={showDialog} onClose={() => setShowDialog(false)} sx={{'& .MuiPaper-root': {borderRadius: "22px"}}}>
-  <DialogTitle>Add a new Task</DialogTitle>
+  <DialogTitle>{translations.addTaskForm.title}</DialogTitle>
   <DialogContent>
     <form onSubmit={(e) => { e.preventDefault(); addNewTask(); }}>
       <TextField
         autoFocus
         margin="dense"
         id="description"
-        label="Description"
+        label={translations.addTaskForm.description}
         type="text"
         fullWidth
         variant="outlined"
@@ -192,7 +218,7 @@ const MainPage: React.FC = () => {
             name="sexual"
           />
         }
-        label="Sexual"
+        label={translations.addTaskForm.filterSexual}
       />
 
       <FormControlLabel
@@ -203,7 +229,7 @@ const MainPage: React.FC = () => {
             name="expensive"
           />
         }
-        label="Expensive"
+        label={translations.addTaskForm.filterExpensive}
       />
 
       <FormControlLabel
@@ -214,14 +240,14 @@ const MainPage: React.FC = () => {
             name="outside"
           />
         }
-        label="Outside"
+        label={translations.addTaskForm.filterOutside}
       />
       <DialogActions>
         <Button type="submit" color="primary" variant="contained">
-          Submit
+          {translations.addTaskForm.submit}
         </Button>
         <Button onClick={() => setShowDialog(false)} color="secondary" variant="contained">
-          Close
+          {translations.addTaskForm.close}
         </Button>
       </DialogActions>
     </form>
@@ -230,24 +256,24 @@ const MainPage: React.FC = () => {
       <div>
         <label>
           <input type="checkbox" checked={filters.sexual} onChange={() => setFilters({ ...filters, sexual: !filters.sexual })} />
-          Sexual
+          {translations.addTaskForm.filterSexual}
         </label>
 
         <label>
           <input type="checkbox" checked={filters.expensive} onChange={() => setFilters({ ...filters, expensive: !filters.expensive })} />
-          Expensive
+          {translations.addTaskForm.filterExpensive}
         </label>
 
         <label>
           <input type="checkbox" checked={filters.outside} onChange={() => setFilters({ ...filters, outside: !filters.outside })} />
-          Outside
+          {translations.addTaskForm.filterOutside}
         </label>
 
       </div>
       <div>
-        <button onClick={() => switchLanguage('de')}></button>
-        <button onClick={() => switchLanguage('en')}></button>
-        <button onClick={() => switchLanguage('es')}></button>
+        <button onClick={() => switchLanguage('de')}><Image src={flagOfGermany} width={50} height={50} alt="DE" /></button>
+        <button onClick={() => switchLanguage('en')}><Image src={flagOfUk} width={50} height={50} alt="EN" /></button>
+        <button onClick={() => switchLanguage('es')}><Image src={flagOfSpain} width={50} height={50} alt="ES" /></button>
       </div>
       <div className="flex justify-center mt-4">
         <button onClick={handleOpenContactForm}><EmailIcon /></button>
