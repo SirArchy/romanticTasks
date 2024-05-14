@@ -1,6 +1,6 @@
 "use client"; 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Dialog from '@mui/material/Dialog';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
@@ -16,17 +16,15 @@ import EmailIcon from '@mui/icons-material/Email';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ContactForm from './contactForm';
-import tasksDe from './romanticTasksDe.json';
-import tasksEn from './romanticTasksEn.json';
-import tasksEs from './romanticTasksEs.json';
-import translationsDe from './translationsDe.json';
-import translationsEn from './translationsEn.json';
-import translationsEs from './translationsEs.json';
 import flagOfGermany from "./utilities/images/Flag_of_Germany.png" 
 import flagOfUk from "./utilities/images/Flag_of_United_Kingdom.png"
 import flagOfSpain from "./utilities/images/Flag_of_Spain.png"
+import translationsDe from './translationsDe.json';
+import translationsEn from './translationsEn.json';
+import translationsEs from './translationsEs.json';
 import Image from 'next/image';
 import { initializeApp } from "firebase/app";
+import { getFirestore, collection, doc, addDoc, getDocs, updateDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgNzpSAukO6EbJAQAo6MgystUV-yrRXkc",
@@ -39,11 +37,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-const taskListByLanguage = {
-  de: tasksDe,
-  en: tasksEn,
-  es: tasksEs,
-};
+const db = getFirestore(app);
 
 const translationsByLanguage = {
   de: translationsDe,
@@ -66,8 +60,10 @@ interface Task {
 const MainPage: React.FC = () => {
   const [language, setLanguage] = useState('en');
   const translations = translationsByLanguage[language as keyof typeof translationsByLanguage];
-  const [tasks, setTasks] = useState<Task[]>(taskListByLanguage[language as keyof typeof taskListByLanguage]);
-  const [currentTask, setCurrentTask] = useState<Task | null>(taskListByLanguage[language as keyof typeof taskListByLanguage][0]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [allTasks, setAllTasks] = useState<{ [key: string]: Task[] }>({});
+  const [currentTasks, setCurrentTasks] = useState<Task[]>([]);
+  const [currentTask, setCurrentTask] = useState<Task | null>(null);
   const [taskEngagements, setTaskEngagements] = useState<{ [key: number]: { likes: number; dislikes: number } }>({});
   const [filters, setFilters] = useState({
     sexual: false,
@@ -91,32 +87,54 @@ const MainPage: React.FC = () => {
     setContactFormOpen(false);
   };
 
-  const switchLanguage = (lang: keyof typeof taskListByLanguage) => {
+  useEffect(() => {
+    const fetchTasks = async () => {
+      const allTasks: { [key: string]: Task[] } = {};
+      for (const lang of ['de', 'en', 'es']) {
+        const taskCollection = collection(db, `tasks_${lang}`);
+        const taskSnapshot = await getDocs(taskCollection);
+        allTasks[lang] = taskSnapshot.docs.map(doc => doc.data() as Task);
+      }
+      setAllTasks(allTasks);
+      setCurrentTasks(allTasks[language]);
+    };
+  
+    fetchTasks();
+  }, [language]);
+  
+  useEffect(() => {
+    setCurrentTasks(allTasks[language]);
+  }, [language, allTasks]);
+
+  const switchLanguage = (lang: 'de' | 'en' | 'es') => {
     setLanguage(lang);
-    setTasks(taskListByLanguage[lang]);
-    setCurrentTask(taskListByLanguage[lang][0]);
   };
 
-  const addNewTask = () => {
+  const addNewTask = async () => {
     if (!newTask.description.trim()) {
       alert(translations.addTaskForm.validate.descriptionAlert);
       return;
     }
 
     const maxId = Math.max(...tasks.map(t => t.id), 0);
+    const newTaskData = {
+      id: maxId + 1,
+      description: newTask.description,
+      attributes: {
+        sexual: newTask.sexual,
+        expensive: newTask.expensive,
+        outside: newTask.outside,
+      },
+      likes: 0,
+      dislikes: 0,
+    };
+
+    const taskCollection = collection(db, `tasks_${language.toLowerCase()}`);
+    await addDoc(taskCollection, newTaskData);
+
     setTasks([
       ...tasks,
-      {
-        id: maxId + 1,
-        description: newTask.description,
-        attributes: {
-          sexual: newTask.sexual,
-          expensive: newTask.expensive,
-          outside: newTask.outside,
-        },
-        likes: 0,
-        dislikes: 0,
-      }
+      newTaskData
     ]);
 
     setNewTask({
@@ -136,44 +154,65 @@ const MainPage: React.FC = () => {
         (!filters.outside || task.attributes.outside)
       );
     });
-
+  
     if (filteredTasks.length === 0) {
       alert(translations.filterAlert);
       return;
     }
-
-    const randomIndex = Math.floor(Math.random() * filteredTasks.length);
-    setCurrentTask(filteredTasks[randomIndex]);
+  
+    const sortedTasks = filteredTasks.sort((a, b) => {
+      const aLikes = a.likes || 0;
+      const bLikes = b.likes || 0;
+      const likesDiff = bLikes - aLikes;
+      if (likesDiff !== 0) {
+        return likesDiff;
+      } else {
+        const aDislikes = a.dislikes || 0;
+        const bDislikes = b.dislikes || 0;
+        return aDislikes - bDislikes;
+      }
+    });
+  
+    const topHalfIndex = Math.floor(sortedTasks.length / 2);
+    const randomIndex = Math.floor(Math.random() * topHalfIndex);
+    setCurrentTask(sortedTasks[randomIndex]);
   };
 
-  const handleLike = (taskId: number) => {
-    setTaskEngagements(prevEngagements => ({
-      ...prevEngagements,
-      [taskId]: {
-        likes: (prevEngagements[taskId]?.likes || 0) + 1,
-        dislikes: prevEngagements[taskId]?.dislikes || 0,
-      }
-    }));
-  };
+  const [userEngagements, setUserEngagements] = useState<{ [key: number]: 'like' | 'dislike' }>({});
 
-  const handleDislike = (taskId: number) => {
-    setTaskEngagements(prevEngagements => ({
-      ...prevEngagements,
-      [taskId]: {
-        likes: prevEngagements[taskId]?.likes || 0,
-        dislikes: (prevEngagements[taskId]?.dislikes || 0) + 1,
-      }
-    }));
+  const handleLike = async () => {
+    if (currentTask && !userEngagements[currentTask.id]) {
+      const taskDoc = doc(db, `tasks_${language.toLowerCase()}`, currentTask.id.toString());
+      const likes = currentTask.likes ? currentTask.likes + 1 : 1;
+      await updateDoc(taskDoc, { likes });
+      setUserEngagements({
+        ...userEngagements,
+        [currentTask.id]: 'like',
+      });
+    }
+  };
+  
+  const handleDislike = async () => {
+    if (currentTask && !userEngagements[currentTask.id]) {
+      const taskDoc = doc(db, `tasks_${language.toLowerCase()}`, currentTask.id.toString());
+      const dislikes = currentTask.dislikes ? currentTask.dislikes + 1 : 1;
+      await updateDoc(taskDoc, { dislikes });
+      setUserEngagements({
+        ...userEngagements,
+        [currentTask.id]: 'dislike',
+      });
+    }
   };
 
   const TaskCard: React.FC<{ task: Task }> = ({ task }) => {
     const engagements = taskEngagements[task.id] || { likes: 0, dislikes: 0 };
+    const userEngagement = userEngagements[task.id];
     return (
       <div className="p-4 m-4 border rounded shadow">
         <p>{task.description}</p>
         <div>
-          <button onClick={() => handleLike(task.id)}><ThumbUpIcon /> ({engagements.likes})</button>
-          <button onClick={() => handleDislike(task.id)}><ThumbDownIcon /> ({engagements.dislikes})</button>
+          <button disabled={!!userEngagement} onClick={() => handleLike()}><ThumbUpIcon /> ({engagements.likes})</button>
+          <button disabled={!!userEngagement} onClick={() => handleDislike()}><ThumbDownIcon /> ({engagements.dislikes})</button>
         </div>
       </div>
     );
