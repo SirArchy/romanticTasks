@@ -25,7 +25,7 @@ import translationsEs from './translationsEs.json';
 import Image from 'next/image';
 import Switch from '@mui/material/Switch';
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, doc, addDoc, getDocs, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgNzpSAukO6EbJAQAo6MgystUV-yrRXkc",
@@ -98,14 +98,9 @@ const MainPage: React.FC = () => {
       }
       setAllTasks(allTasks);
       setCurrentTasks(allTasks[language]);
-    };
-  
+    };    
     fetchTasks();
   }, [language]);
-  
-  useEffect(() => {
-    setCurrentTasks(allTasks[language]);
-  }, [language, allTasks]);
 
   const switchLanguage = (lang: 'de' | 'en' | 'es') => {
     setLanguage(lang);
@@ -130,11 +125,11 @@ const MainPage: React.FC = () => {
       dislikes: 0,
     };
 
-    const taskCollection = collection(db, `tasks_${language.toLowerCase()}`);
+    const taskCollection = collection(db, `tasks_${language}`);
     await addDoc(taskCollection, newTaskData);
 
     setTasks([
-      ...tasks,
+      ...currentTasks,
       newTaskData
     ]);
 
@@ -148,7 +143,7 @@ const MainPage: React.FC = () => {
   };
 
   const getRandomTask = () => {
-    const filteredTasks = tasks.filter((task) => {
+    const filteredTasks = currentTasks.filter((task) => {
       return (
         (!filters.sexual || task.attributes.sexual) &&
         (!filters.expensive || task.attributes.expensive) &&
@@ -179,28 +174,48 @@ const MainPage: React.FC = () => {
     setCurrentTask(sortedTasks[randomIndex]);
   };
 
-  const [userEngagements, setUserEngagements] = useState<{ [key: number]: 'like' | 'dislike' }>({});
+  const [userEngagements, setUserEngagements] = useState<{ [key: number]: 'like' | 'dislike' | undefined }>({});
 
-  const handleLike = async () => {
-    if (currentTask && !userEngagements[currentTask.id]) {
-      const taskDoc = doc(db, `tasks_${language.toLowerCase()}`, currentTask.id.toString());
-      const likes = currentTask.likes ? currentTask.likes + 1 : 1;
-      await updateDoc(taskDoc, { likes });
+  const handleLike = () => {
+    if (currentTask) {
+      const currentEngagement = userEngagements[currentTask.id];
+      const isAlreadyLiked = currentEngagement === 'like';
+      const isAlreadyDisliked = currentEngagement === 'dislike';
+  
       setUserEngagements({
         ...userEngagements,
-        [currentTask.id]: 'like',
+        [currentTask.id]: isAlreadyLiked ? undefined : 'like'
+      });
+  
+      setTaskEngagements({
+        ...taskEngagements,
+        [currentTask.id]: {
+          ...taskEngagements[currentTask.id],
+          likes: (taskEngagements[currentTask.id]?.likes || 0) + (isAlreadyLiked ? -1 : 1),
+          dislikes: (taskEngagements[currentTask.id]?.dislikes || 0) - (isAlreadyDisliked ? 1 : 0)
+        }
       });
     }
   };
   
-  const handleDislike = async () => {
-    if (currentTask && !userEngagements[currentTask.id]) {
-      const taskDoc = doc(db, `tasks_${language.toLowerCase()}`, currentTask.id.toString());
-      const dislikes = currentTask.dislikes ? currentTask.dislikes + 1 : 1;
-      await updateDoc(taskDoc, { dislikes });
+  const handleDislike = () => {
+    if (currentTask) {
+      const currentEngagement = userEngagements[currentTask.id];
+      const isAlreadyDisliked = currentEngagement === 'dislike';
+      const isAlreadyLiked = currentEngagement === 'like';
+  
       setUserEngagements({
         ...userEngagements,
-        [currentTask.id]: 'dislike',
+        [currentTask.id]: isAlreadyDisliked ? undefined : 'dislike'
+      });
+  
+      setTaskEngagements({
+        ...taskEngagements,
+        [currentTask.id]: {
+          ...taskEngagements[currentTask.id],
+          dislikes: (taskEngagements[currentTask.id]?.dislikes || 0) + (isAlreadyDisliked ? -1 : 1),
+          likes: (taskEngagements[currentTask.id]?.likes || 0) - (isAlreadyLiked ? 1 : 0)
+        }
       });
     }
   };
@@ -210,10 +225,10 @@ const MainPage: React.FC = () => {
     const userEngagement = userEngagements[task.id];
     return (
       <div className="p-4 m-4 border rounded shadow">
-        <p>{task.description}</p>
+        <p className="text-white text-2xl font-bold mb-4 text-center">{task.description}</p>
         <div>
-          <button disabled={!!userEngagement} onClick={() => handleLike()}><ThumbUpIcon /> ({engagements.likes})</button>
-          <button disabled={!!userEngagement} onClick={() => handleDislike()}><ThumbDownIcon /> ({engagements.dislikes})</button>
+          <button disabled={!!userEngagement} onClick={handleLike}><ThumbUpIcon /> ({engagements.likes})</button>
+          <button disabled={!!userEngagement} onClick={handleDislike}><ThumbDownIcon /> ({engagements.dislikes})</button>
         </div>
       </div>
     );
@@ -221,8 +236,8 @@ const MainPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex justify-center items-center">
-      <div className="bg-black rounded-lg p-6 w-full max-w-2xl min-h-[50vh]">
-      <h1 className="text-white text-4xl font-bold mb-4 text-center">{translations.title}</h1>
+      <div className="bg-black rounded-lg w-full max-w-2xl min-h-[80vh]">
+      <h1 className="text-4xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-700 via-pink-500 to-red-500">{translations.title}</h1>
       {currentTask && <TaskCard task={currentTask} />}
       <button 
           className="bg-purple-700 text-white font-bold py-2 px-4 rounded-full mt-4 hover:bg-purple-800 transition-colors duration-200"
@@ -247,6 +262,7 @@ const MainPage: React.FC = () => {
           <Switch
             checked={filters.sexual}
             onChange={() => setFilters({ ...filters, sexual: !filters.sexual })}
+            color="secondary"
           />
         }
         label={translations.addTaskForm.filterSexual}
@@ -257,6 +273,7 @@ const MainPage: React.FC = () => {
           <Switch
             checked={filters.expensive}
             onChange={() => setFilters({ ...filters, expensive: !filters.expensive })}
+            color="secondary"
           />
         }
         label={translations.addTaskForm.filterExpensive}
@@ -267,6 +284,7 @@ const MainPage: React.FC = () => {
           <Switch
             checked={filters.outside}
             onChange={() => setFilters({ ...filters, outside: !filters.outside })}
+            color="secondary"
           />
         }
         label={translations.addTaskForm.filterOutside}
@@ -288,7 +306,7 @@ const MainPage: React.FC = () => {
         onClick={() => setShowDialog(true)}>
         {translations.addTaskButton}
       </button>
-      <Dialog open={showDialog} onClose={() => setShowDialog(false)} sx={{'& .MuiPaper-root': {borderRadius: "22px"}}} className="bg-black rounded-lg p-6 w-11/12 max-w-md">
+      <Dialog open={showDialog} onClose={() => setShowDialog(false)} sx={{'& .MuiPaper-root': {borderRadius: "22px", boxShadow: '0px 4px 4px rgba(0, 0, 0, 0.25)',}}}>
   <DialogTitle>{translations.addTaskForm.title}</DialogTitle>
   <DialogContent >
     <form onSubmit={(e) => { e.preventDefault(); addNewTask(); }}>
@@ -347,17 +365,19 @@ const MainPage: React.FC = () => {
     </form>
   </DialogContent>
 </Dialog>
-      <div className="flex justify-center items-center space-x-4 space-y-4">
+  <div className="min-h-[30vh] flex flex-col items-center px-4 md:px-0">
+      <div className="flex justify-center items-center space-x-4 space-y-4 mt-auto">
         <button onClick={() => switchLanguage('de')}><Image src={flagOfGermany} width={50} height={50} alt="DE" /></button>
         <button onClick={() => switchLanguage('en')}><Image src={flagOfUk} width={50} height={50} alt="EN" /></button>
         <button onClick={() => switchLanguage('es')}><Image src={flagOfSpain} width={50} height={50} alt="ES" /></button>
       </div>
-      <div className="flex justify-center items-center space-x-4 space-y-4">
+      <div className="flex justify-center items-center space-x-4 space-y-4 mb-4">
         <button onClick={handleOpenContactForm}><EmailIcon /></button>
         <button onClick={() => window.location.href='mailto:fabian.ebert@online.de'}><AlternateEmailIcon /></button>
         <button onClick={() => window.open('https://github.com/SirArchy', '_blank')}><GitHubIcon /></button>
         <button onClick={() => window.open('https://www.linkedin.com/in/fabian-e-762b85244', '_blank')}><LinkedInIcon /></button>
     </div>
+  </div>
     <Dialog open={isContactFormOpen} onClose={handleCloseContactForm} sx={{'& .MuiPaper-root': {borderRadius: "22px"}}}>
         <ContactForm />
       </Dialog>

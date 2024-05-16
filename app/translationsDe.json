@@ -1,7 +1,7 @@
 {
   "title": "ROMANTISCHE AUFGABEN GENERATOR",
   "include": "Inkludiert: ",
-  "newTaskButton": "Neue Aufgabe",
+  "newTaskButton": "Generiere Aufgabe",
   "addTaskButton": "Erstelle Aufgabe",
   "filterAlert": "Es konnten keine Aufgaben für die ausgewählten Filter gefunden werden.",
   "contactForm": {

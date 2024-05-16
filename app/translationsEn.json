@@ -1,7 +1,7 @@
 {
 "title": "ROMANTIC TASK GENERATOR",
 "include": "Include: ",
-"newTaskButton": "Get another task",
+"newTaskButton": "Generate task",
 "addTaskButton": "Add new task",
 "filterAlert": "No tasks match your filters.",
 "contactForm": {

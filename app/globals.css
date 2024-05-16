@@ -20,7 +20,7 @@ body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
     to bottom,
-    rgb(23, 25, 64) 0%, rgb(93, 35, 130) 37%, rgb(161, 13, 99) 100%
+    rgb(50, 53, 111) 0%, rgb(93, 35, 130) 37%, rgb(161, 13, 99) 100%
   );
 }
 
