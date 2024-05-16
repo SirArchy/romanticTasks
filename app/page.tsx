@@ -16,9 +16,9 @@ import EmailIcon from '@mui/icons-material/Email';
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import ContactForm from './contactForm';
-import flagOfGermany from "./utilities/images/Flag_of_Germany.png" 
-import flagOfUk from "./utilities/images/Flag_of_United_Kingdom.png"
-import flagOfSpain from "./utilities/images/Flag_of_Spain.png"
+import flagOfGermany from "./Flag_of_Germany.png" 
+import flagOfUk from "./Flag_of_United_Kingdom.png"
+import flagOfSpain from "./Flag_of_Spain.png"
 import translationsDe from './translationsDe.json';
 import translationsEn from './translationsEn.json';
 import translationsEs from './translationsEs.json';
@@ -26,6 +26,7 @@ import Image from 'next/image';
 import Switch from '@mui/material/Switch';
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, doc, addDoc, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyBgNzpSAukO6EbJAQAo6MgystUV-yrRXkc",
